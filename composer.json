@@ -42,5 +42,5 @@
 		"phpstan/phpstan": "^1.10",
 		"szepeviktor/phpstan-wordpress": "^1.3",
 		"phpcsstandards/phpcsutils": "^1.0"
-    },
+    }
 }
