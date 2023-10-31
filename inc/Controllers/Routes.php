@@ -11,12 +11,10 @@
  * @since   1.0.0
  */
 
-namespace DevKit\Plugin\Routes;
+namespace DevKit\Plugin\Controllers;
 
-use DevKit\Plugin\DI\ContainerBuilder,
-	DevKit\Plugin\Abstracts,
-	DevKit\Plugin\Interfaces,
-	DevKit\Plugin\Services;
+use DevKit\Plugin\Abstracts,
+	DevKit\Plugin\Interfaces;
 
 /**
  * Control functions related to routing
@@ -29,7 +27,7 @@ extends Abstracts\Controller
 	/**
 	 * Construct new instance of the controller
 	 *
-	 * @param Services\Router $route_handler : Instance of Services Router.
+	 * @param Interfaces\Handlers\Routes $route_handler : Instance of Services Router.
 	 */
 	public function __construct( protected Interfaces\Handlers\Routes $route_handler )
 	{
@@ -43,24 +41,24 @@ extends Abstracts\Controller
 	public static function getServiceDefinitions(): array
 	{
 		return [
-			Frontend::class   => ContainerBuilder::autowire(),
-			Admin::class      => ContainerBuilder::autowire(),
-			Login::class      => ContainerBuilder::autowire(),
-			Single::class     => ContainerBuilder::autowire(),
-			Frontpage::class  => ContainerBuilder::autowire(),
-			Archive::class    => ContainerBuilder::autowire(),
-			Blog::class       => ContainerBuilder::autowire(),
-			Search::class     => ContainerBuilder::autowire(),
-			Error404::class   => ContainerBuilder::autowire(),
-			'route.frontend'  => ContainerBuilder::get( Frontend::class ),
-			'route.admin'     => ContainerBuilder::get( Admin::class ),
-			'route.login'     => ContainerBuilder::get( Login::class ),
-			'route.single'    => ContainerBuilder::get( Single::class ),
-			'route.frontpage' => ContainerBuilder::get( Frontpage::class ),
-			'route.archive'   => ContainerBuilder::get( Archive::class ),
-			'route.blog'      => ContainerBuilder::get( Blog::class ),
-			'route.search'    => ContainerBuilder::get( Search::class ),
-			'route.404'       => ContainerBuilder::get( Error404::class ),
+			// Frontend::class   => ContainerBuilder::autowire(),
+			// Admin::class      => ContainerBuilder::autowire(),
+			// Login::class      => ContainerBuilder::autowire(),
+			// Single::class     => ContainerBuilder::autowire(),
+			// Frontpage::class  => ContainerBuilder::autowire(),
+			// Archive::class    => ContainerBuilder::autowire(),
+			// Blog::class       => ContainerBuilder::autowire(),
+			// Search::class     => ContainerBuilder::autowire(),
+			// Error404::class   => ContainerBuilder::autowire(),
+			// 'route.frontend'  => ContainerBuilder::get( Frontend::class ),
+			// 'route.admin'     => ContainerBuilder::get( Admin::class ),
+			// 'route.login'     => ContainerBuilder::get( Login::class ),
+			// 'route.single'    => ContainerBuilder::get( Single::class ),
+			// 'route.frontpage' => ContainerBuilder::get( Frontpage::class ),
+			// 'route.archive'   => ContainerBuilder::get( Archive::class ),
+			// 'route.blog'      => ContainerBuilder::get( Blog::class ),
+			// 'route.search'    => ContainerBuilder::get( Search::class ),
+			// 'route.404'       => ContainerBuilder::get( Error404::class ),
 		];
 	}
 	/**
