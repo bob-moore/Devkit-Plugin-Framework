@@ -21,7 +21,7 @@ use DevKit\Plugin\Abstracts,
  *
  * @subpackage Controllers
  */
-class Route_Controller 
+class Routes 
 extends Abstracts\Controller
 {
 	/**
