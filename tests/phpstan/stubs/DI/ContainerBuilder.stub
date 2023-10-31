@@ -1,0 +1,13 @@
+<?php
+
+namespace DI;
+
+use \DevKit\Plugin\Container;
+
+class ContainerBuilder
+{
+    /**
+     * @return Container
+     */
+    public function build(); 
+}

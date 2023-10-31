@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "phpstan": "lib/bin/phpstan analyze -c tests/phpstan/phpstan.neon --memory-limit=2048M",
+    "phpsniff" : "lib/bin/phpcs inc -v --standard='tests/phpcs.xml'",
+    "phpsniff:fix" : "lib/bin/phpcbf inc -v --standard='tests/phpcs.xml'",
+    "phpsniff:default" : "lib/bin/phpcs inc -v",
+    "phpsniff:PSR12" : "lib/bin/phpcs inc -v --standard='PSR12'",
+    "phpsniff:PSR2" : "lib/bin/phpcs inc -v --standard='PSR2'",
+    "phpsniff:WP" : "lib/bin/phpcs inc/Abstracts -v --standard='WordPress'"
+  },
+  "author": "Mid-West Family Madison",
+  "license": "GPL-2.0"
+}
