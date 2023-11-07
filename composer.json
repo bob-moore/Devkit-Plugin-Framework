@@ -1,4 +1,15 @@
 {
+    "name": "devkit/plugin",
+    "description": "Plugin framework for WordPress Plugins",
+    "type": "library",
+    "minimum-stability": "dev",
+    "license": "GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>",
+    "authors": [
+        {
+            "name": "Bob Moore",
+            "email": "bob@bobmoore.dev"
+        }
+    ],
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"config": {
