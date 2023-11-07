@@ -1,5 +1,5 @@
 {
-    "name": "devkit/plugin",
+    "name": "mwf/plugin-framework",
     "description": "Plugin framework for WordPress Plugins",
     "type": "library",
     "minimum-stability": "dev",
