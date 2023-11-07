@@ -4,16 +4,16 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Routes;
+namespace MWF\Plugin\Routes;
 
-use DevKit\Plugin\Abstracts;
+use MWF\Plugin\Abstracts;
 
 /**
  * Admin router class
@@ -38,13 +38,13 @@ class Admin extends Abstracts\Route
 	 */
 	public function enqueueAssets(): void
 	{
-		$this->asset_handler->enqueueScript(
-			'admin',
-			'admin/bundle.js'
+		$this->script_handler->enqueue(
+			'frontend',
+			'frontend/bundle.js'
 		);
-		$this->asset_handler->enqueueStyle(
-			'admin',
-			'admin/bundle.css'
+		$this->style_handler->enqueue(
+			'frontend',
+			'frontend/bundle.css'
 		);
 	}
 }

@@ -4,14 +4,18 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Traits;
+namespace MWF\Plugin\Traits;
+
+use DI\Attribute\Inject;
+
+use MWF\Plugin\Interfaces;
 
 /**
  * Directory Handler Trait
@@ -38,9 +42,10 @@ trait DirectoryHandler
 	 *
 	 * @return void
 	 */
-	protected function setDir( $root = null, string $append = '' ): void
+	#[Inject]
+	public function setDir( #[Inject( 'app.dir' )] string $root, string $append = '' ): void
 	{
-			$this->dir = $this->appendDir( $root ?? plugin_dir_path( dirname( __DIR__, 1 ) ), $append );
+			$this->dir = $this->appendDir( $root, $append );
 	}
 	/**
 	 * Get the directory path with string appended
@@ -49,7 +54,7 @@ trait DirectoryHandler
 	 *
 	 * @return string complete url
 	 */
-	protected function dir( string $append = '' ): string
+	public function dir( string $append = '' ): string
 	{
 		return $this->appendDir( $this->dir, $append );
 	}

@@ -4,17 +4,20 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\DI;
+namespace MWF\Plugin\DI;
 
-use DI\Definition\Helper\AutowireDefinitionHelper,
-	DI\Definition\Reference;
+use DI\Definition\Source\DefinitionSource,
+	DI\Definition\Reference,
+	DI\Definition\Helper;
+
+use MWF\Plugin\Interfaces;
 
 /**
  * Builder for Service Containers
@@ -65,25 +68,89 @@ class ContainerBuilder extends \DI\ContainerBuilder
 		self::$containers[ $container_id ] = $container;
 	}
 	/**
+     * Add definitions to the container.
+     *
+     * @param string|array|DefinitionSource ...$definitions Can be an array of definitions, the
+     *                                                      name of a file containing definitions
+     *                                                      or a DefinitionSource object.
+     * @return $this
+     */
+    public function addDefinitions(string|array|DefinitionSource ...$definitions) : self
+    {
+        foreach ($definitions as $definition ) {
+			$this->autowireControllers( $definition );
+        }
+
+		parent::addDefinitions( ...$definitions );
+
+        return $this;
+    }
+	/**
+	 * Autowire controller services
+	 *
+	 * @param string|array|DefinitionSource $definitions
+	 *
+	 * @return void
+	 */
+	protected function autowireControllers( string|array|DefinitionSource $definitions )
+	{
+		if ( is_array( $definitions ) ) {
+
+			foreach ( $definitions as $key => $definition ) {
+				/**
+				 * Setup class alias for interface definitions
+				 */
+				if ( ! class_exists( $key ) ) {
+					continue;
+				}
+				if ( in_array( Interfaces\Controller::class, class_implements( $key ), true ) ) {
+					// var_dump($key::getServiceDefinitions());
+					$this->addDefinitions( $key::getServiceDefinitions() );
+				}
+			}
+		}
+	}
+	/**
 	 * Wrapper for parent autowire function. Only used for simplicity
 	 *
 	 * @param string $class_name : name of service to autowire.
 	 *
-	 * @return AutowireDefinitionHelper
+	 * @return Helper\DefinitionHelper
 	 */
-	public static function autowire( string $class_name = null ): AutowireDefinitionHelper
+	public static function autowire( string $class_name = null ): Helper\DefinitionHelper
 	{
 		return \DI\autowire( $class_name );
 	}
+	/**
+     * Helper for defining an object.
+     *
+     * @param string|null $class_name Class name of the object.
+     *                               If null, the name of the entry (in the container) will be used as class name.
+     */
+    public static function create( string $class_name = null) : Helper\DefinitionHelper
+    {
+        return \DI\create( $class_name );
+    }
 	/**
 	 * Wrapper for parent get function. Only used for simplicity
 	 *
 	 * @param string $class_name : name of service to retrieve.
 	 *
-	 * @return Reference
+	 * @return Reference;
 	 */
 	public static function get( string $class_name ): Reference
 	{
 		return \DI\get( $class_name );
 	}
+
+	/**
+     * Helper for defining a container entry using a factory function/callable.
+     *
+     * @param callable|array|string $factory The factory is a callable that takes the container as parameter
+     *        and returns the value to register in the container.
+     */
+    function factory( callable|array|string $factory ) : Helper\DefinitionHelper
+    {
+        return \DI\factory( $factory );
+    }
 }

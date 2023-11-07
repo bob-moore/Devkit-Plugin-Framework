@@ -4,16 +4,16 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Traits\Uses;
+namespace MWF\Plugin\Traits\Uses;
 
-use DevKit\Plugin\Interfaces;
+use MWF\Plugin\Interfaces;
 
 /**
  * Asset Handler User Trait
@@ -22,21 +22,17 @@ use DevKit\Plugin\Interfaces;
  */
 trait Assets
 {
-    /**
-     * Instance of the asset handler
-     *
-     * @var Interfaces\AssetHandler
-     */
-    protected Interfaces\AssetHandler $asset_handler;
-    /**
-     * Setter for the asset directory
-     *
-     * @param string $directory : path to the assets directory
-     *
-     * @return void
-     */
-    public function setAssetHandler( Interfaces\AssetHandler $asset_handler ) : void
+
+    protected Interfaces\Dispatchers\Scripts $script_handler;
+    protected Interfaces\Dispatchers\Styles $style_handler;
+
+    public function setScriptHandler( Interfaces\Dispatchers\Scripts $script_handler ) : void
     {
-        $this->asset_handler = $asset_handler;
+        $this->script_handler = $script_handler;
+    }
+
+    public function setStyleHandler( Interfaces\Dispatchers\Styles $style_handler ) : void
+    {
+        $this->style_handler = $style_handler;
     }
 }

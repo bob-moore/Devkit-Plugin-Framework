@@ -4,26 +4,27 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author  Bob Moore <bob.moore@midwestfamilymadison.com>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
- * @link    https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link    https://github.com/MDMDevOps/mwf-cornerstone
  * @since   1.0.0
  */
 
-namespace DevKit\Plugin\Abstracts;
+namespace MWF\Plugin\Abstracts;
 
-use DevKit\Plugin\Interfaces,
-	DevKit\Plugin\Traits;
+use MWF\Plugin\Interfaces,
+	MWF\Plugin\Traits;
 
 /**
  * Route class
  *
  * @subpackage Route
  */
-abstract class Route 
+abstract class Route
 extends Service 
-implements Interfaces\Handlers\Routes, Interfaces\Uses\Assets
+implements Interfaces\Route, Interfaces\Uses\Styles, Interfaces\Uses\Scripts
 {
-	use Traits\Uses\Assets;
+	use Traits\Uses\Styles,
+		Traits\Uses\Scripts;
 }

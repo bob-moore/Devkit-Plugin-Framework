@@ -4,19 +4,19 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author  Bob Moore <bob.moore@midwestfamilymadison.com>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
- * @link    https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link    https://github.com/MDMDevOps/mwf-cornerstone
  * @since   1.0.0
  */
 
-namespace DevKit\Plugin\Abstracts;
+namespace MWF\Plugin\Abstracts;
 
-use DevKit\Plugin\Interfaces,
-    DevKit\Plugin\Services,
-    DevKit\Plugin\DI\Container,
-    DevKit\Plugin\DI\ContainerBuilder;
+use MWF\Plugin\Interfaces,
+    MWF\Plugin\Traits,
+    MWF\Plugin\DI\Container,
+    MWF\Plugin\DI\ContainerBuilder;
 
 /**
  * App Class
@@ -25,16 +25,11 @@ use DevKit\Plugin\Interfaces,
  *
  * @subpackage Traits
  */
-abstract class App extends Controller
+abstract class App extends Service
 {
-    /**
-     * App specific definitions
-     * 
-     * Array of app strings.
-     *
-     * @var array<string, mixed>
-     */
-    protected array $app_definitions = [];
+	use Traits\UrlHandler;
+	use Traits\DirectoryHandler;
+
 	/**
 	 * The service container for dependency injections, and locating service
 	 * instances
@@ -51,11 +46,6 @@ abstract class App extends Controller
 	public function __construct( string $package = '' )
 	{
 		$this->setPackage( $package );
-
-        $this->app_definitions = wp_parse_args( 
-            $this->app_definitions, 
-            [ 'app.package' => $this->package ]
-        );
 
 		$this->service_container = $this->getContainer();
 
@@ -88,9 +78,9 @@ abstract class App extends Controller
 	{
 		$container_builder = new ContainerBuilder();
 
-		$container_builder->addDefinitions( $this->app_definitions );
+		$container_builder->useAttributes(true);
 
-		$container_builder->addDefinitions( static::getServiceDefinitions() );
+		$container_builder->addDefinitions( $this->getServiceDefinitions() );
 
 		$container = $container_builder->build();
 
@@ -112,6 +102,15 @@ abstract class App extends Controller
 			ContainerBuilder::cacheContainer( static::class, $container );
 		}
 		return $container;
+	}
+	/**
+	 * Get service definitons to add to service container
+	 *
+	 * @return void
+	 */
+	protected function getServiceDefinitions() : string|array|\DI\Definition\Source\DefinitionSource
+	{
+		return [ 'app.package' => $this->package ];
 	}
 	/**
 	 * Instantiate controllers
@@ -150,6 +149,7 @@ abstract class App extends Controller
 	 */
 	public function loadRoute( string $alias ): void
 	{
+		// var_dump($this->service_container->get( $alias ));
 		$this->service_container->get( $alias );
 	}
     /**
@@ -162,28 +162,28 @@ abstract class App extends Controller
      */
     public function decorateServices( mixed $service_handler, Container $container ) : mixed
     {
-        $interfaces = class_implements( $service_handler );
+        // $interfaces = class_implements( $service_handler );
         /**
          * Decorate instances that implement th UseAssets interface with the asset
          * handler
          */
-        if ( in_array( Interfaces\Uses\Assets::class, $interfaces, true ) ) {
-			if ( $container->has( Interfaces\Handlers\Assets::class ) ) {
-				$service_handler->setAssetHandler( $container->get( Interfaces\Handlers\Assets::class ) );
-			} else {
-				$service_handler->setAssetHandler( $container->get( Services\Assets::class ) );	
-			}
-        }
+        // if ( in_array( Interfaces\Uses\Assets::class, $interfaces, true ) ) {
+		// 	if ( $container->has( Interfaces\Handlers\Assets::class ) ) {
+		// 		$service_handler->setAssetHandler( $container->get( Interfaces\Handlers\Assets::class ) );
+		// 	} else {
+		// 		$service_handler->setAssetHandler( $container->get( Services\Assets::class ) );	
+		// 	}
+        // }
         /**
          * Decorate instances that implement the handler interface with package,
          * and load the class
          */
-        if ( in_array( Interfaces\Handler::class, $interfaces, true ) ) {
-			if ( $container->has( 'app.package' ) ) {
-				$service_handler->setPackage( $container->get( 'app.package' ) );
-			}
-            $service_handler->load();
-        }
+        // if ( in_array( Interfaces\Service::class, $interfaces, true ) ) {
+		// 	if ( $container->has( 'app.package' ) ) {
+		// 		// $service_handler->setPackage( $container->get( 'app.package' ) );
+		// 	}
+        //     // $service_handler->load();
+        // }
         return $service_handler;
     }
 	/**

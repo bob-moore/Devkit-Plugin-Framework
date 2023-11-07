@@ -4,17 +4,17 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Services;
+namespace MWF\Plugin\Services;
 
-use DevKit\Plugin\Abstracts,
-	DevKit\Plugin\Interfaces;
+use MWF\Plugin\Abstracts,
+	MWF\Plugin\Interfaces;
 
 /**
  * Service class for router actions
@@ -23,7 +23,7 @@ use DevKit\Plugin\Abstracts,
  */
 class Router 
 extends Abstracts\Service
-implements Interfaces\Handlers\Routes
+implements Interfaces\Services\Router
 {
 	/**
 	 * Routes available on current context
@@ -82,5 +82,56 @@ implements Interfaces\Handlers\Routes
 			$this->routes = $this->defineRoutes();
 		}
 		return $this->routes;
+	}
+	/**
+	 * Get routes via filter
+	 *
+	 * @param string|array<string> $default_routes : routes to prepend to the list
+	 *
+	 * @return array
+	 */
+	public function getRoutesByFilter( string|array $default_routes = [] ): array
+	{
+		$routes = $this->getRoutes();
+
+		switch ( true ) {
+			case is_array( $default_routes ):
+				$routes = array_merge( $default_routes, $routes );
+				break;
+			case is_string( $default_routes ) && ! empty( $default_routes ):
+				array_unshift( $routes, $default_routes );
+				break;
+			default:
+				break;
+		}
+		return $routes;
+	}
+	/**
+	 * Setter for $route
+	 *
+	 * @return void
+	 */
+	public function loadRoute(): void
+	{
+		foreach ( $this->getRoutes() as $route ) {
+			$alias = 'route.' . strtolower( $route );
+
+			$has_route = apply_filters( "{$this->package}_has_route", false, $alias );
+
+			if ( ! $this->routeHasLoaded() && $has_route ) {
+				do_action( "{$this->package}_load_route", $alias, $route );
+			}
+
+			do_action( "{$this->package}_route_{$route}", $alias );
+		}
+	}
+	/**
+	 * Determine if a route has already been loaded
+	 *
+	 * @return boolean
+	 */
+	public function routeHasLoaded() : bool
+	{
+		return did_action( "{$this->package}_load_route" );
 	}
 }

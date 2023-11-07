@@ -4,24 +4,26 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Services;
+namespace MWF\Plugin\Services;
 
-use DevKit\Plugin\Abstracts,
-	DevKit\Plugin\Interfaces,
-	DevKit\Plugin\Traits,
+use MWF\Plugin\Abstracts,
+	MWF\Plugin\Interfaces,
+	MWF\Plugin\Traits,
 	Timber\Timber,
 	Timber\Loader,
 	Timber\Twig_Function,
 	Timber\Twig_Filter,
 	Twig\Environment,
 	Twig\Error\SyntaxError;
+
+use DI\Attribute\Inject;
 
 /**
  * Service class to compile twig files and provide timber functions
@@ -34,7 +36,7 @@ use DevKit\Plugin\Abstracts,
  */
 class Compiler
 extends Abstracts\Service
-implements Interfaces\Handlers\Directory
+implements Interfaces\Services\Compiler, Interfaces\Handlers\Directory
 {
 	use Traits\DirectoryHandler;
 
@@ -51,28 +53,37 @@ implements Interfaces\Handlers\Directory
 	 */
 	private array $filters = [];
 	/**
+	 * Cached template locations for timber to search for templates
+	 *
+	 * @var array<string>
+	 */
+	private array $template_locations = [];
+	/**
 	 * Instance of twig
 	 *
 	 * @var ?Environment
 	 */
 	protected ?Environment $twig;
 	/**
-	 * Path to template files
-	 *
-	 * @var string
-	 */
-	public string $template_directory = 'template-parts';
-	/**
 	 * Constructor for new service instance
 	 *
 	 * @param string $dir : path to template files.
 	 */
 	public function __construct(
-		string $dir
+		#[Inject( 'app.templates.dir' )] protected string $template_directory = 'template-parts'
 	) {
-		$this->setDir( $dir );
-
 		parent::__construct();
+	}
+	/**
+	 * Set the template directory
+	 *
+	 * @param string $template_directory : relative path to the template directory
+	 *
+	 * @return void
+	 */
+	public function setTemplateDirectory( string $template_directory ): void
+	{
+		$this->$template_directory = trim( $template_directory );
 	}
 	/**
 	 * Load actions and filters, and other setup requirements
@@ -130,9 +141,13 @@ implements Interfaces\Handlers\Directory
 	 */
 	public function templateLocations( array $locations ): array
 	{
-		$locations[] = $this->dir( $this->template_directory );
-
-		return $locations;
+		if ( empty( $this->template_locations ) ) {
+			$this->template_locations = array_filter( $locations, function( $location ) {
+				return str_contains( $locations, $this->dir() );
+			} );
+			$this->template_locations[] = $this->dir( $this->template_directory );
+		}
+		return $this->template_locations;
 	}
 	/**
 	 * Compile a twig/html template file using Timber
@@ -239,8 +254,8 @@ implements Interfaces\Handlers\Directory
 	public function getFunctions(): array
 	{
 		return did_filter( "{$this->package}_twig_functions" )
-		? $this->functions
-		: apply_filters( "{$this->package}_twig_functions", $this->functions );
+			? $this->functions
+			: apply_filters( "{$this->package}_twig_functions", $this->functions );
 	}
 	/**
 	 * Getter for $filters that runs a filter once
@@ -250,8 +265,8 @@ implements Interfaces\Handlers\Directory
 	public function getFilters(): array
 	{
 		return did_filter( "{$this->package}_twig_filters" )
-		? $this->filters
-		: apply_filters( "{$this->package}_twig_filters", $this->filters );
+			? $this->filters
+			: apply_filters( "{$this->package}_twig_filters", $this->filters );
 	}
 	/**
 	 * Register custom function with TWIG
@@ -290,24 +305,6 @@ implements Interfaces\Handlers\Directory
 		return $twig;
 	}
 	/**
-	 * Bind filters and functions to twig.
-	 *
-	 * @param string                   $type : what to bind, either 'filter' or 'function'.
-	 * @param string                   $name : name of function or filter.
-	 * @param string|array<int, mixed> $callback : callback function.
-	 * @param array<string, mixed>     $args : Twig arguments.
-	 *
-	 * @return void
-	 */
-	public function bind( string $type, string $name, $callback, array $args = [] ): void
-	{
-		if ( 'function' === $type ) {
-			$this->addFunction( $name, $callback, $args );
-		} elseif ( 'filter' === $type ) {
-			$this->addFilter( $name, $callback, $args );
-		}
-	}
-	/**
 	 * Add a function to collection of twig functions
 	 *
 	 * @param string                   $name : name of function to bind.
@@ -319,7 +316,7 @@ implements Interfaces\Handlers\Directory
 	 *
 	 * @return void
 	 */
-	public function addFunction( string $name, $callback, array $args = [] ): void
+	public function addFunction( string $name, string|array $callback, array $args = [] ): void
 	{
 		$this->functions[ $name ] = [
 			'callback' => $callback,
@@ -338,32 +335,12 @@ implements Interfaces\Handlers\Directory
 	 *
 	 * @return void
 	 */
-	public function addFilter( string $name, $callback, array $args = [] ): void
+	public function addFilter( string $name, string|array $callback, array $args = [] ): void
 	{
 		$this->filters[ $name ] = [
 			'callback' => $callback,
 			'args'     => $args,
 		];
-	}
-	/**
-	 * Wrapper to call functions from twig
-	 *
-	 * @param mixed ...$args : all arguments passed, unknown.
-	 *
-	 * @return mixed
-	 */
-	public function doFunction( ...$args )
-	{
-		$function = array_shift( $args );
-
-		ob_start();
-		try {
-			$output  = is_callable( $function ) ? call_user_func( $function, ...$args ) : null;
-			$content = ob_get_clean();
-			return $output ?? $content;
-		} catch ( \Error $e ) {
-			return null;
-		}
 	}
 	/**
 	 * Use twig to check if a given template exists in the defined paths

@@ -1,25 +1,27 @@
 <?php
 /**
- * Service Controller
+ * Handler Controller
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author Bob Moore <bob.moore@midwestfamilymadison.com>
- * @link https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link https://github.com/MDMDevOps/mwf-cornerstone
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
  * @since 1.0.0
  */
 
-namespace DevKit\Plugin\Services;
+namespace MWF\Plugin\Controllers;
 
-use DevKit\Plugin\DI\ContainerBuilder,
-	DevKit\Plugin\Abstracts;
+use MWF\Plugin\DI\ContainerBuilder,
+	MWF\Plugin\Services as Service,
+	MWF\Plugin\Interfaces,
+	MWF\Plugin\Abstracts;
+
+use Psr\Container\ContainerInterface;
 
 /**
- * Service controller class
- *
- * Controls and orchestrates the execution of any plugin services.
+ * Controls the registration and execution of handler classes
  *
  * @subpackage Controllers
  */
@@ -28,10 +30,11 @@ class Services extends Abstracts\Controller
 	/**
 	 * Constructor for new instances
 	 *
-	 * @param Compiler $compiler Compiler service instance.
+	 * @param Interfaces\Services\Compiler $compiler Compiler service instance.
 	 */
 	public function __construct(
-		protected Compiler $compiler
+		protected Interfaces\Services\Compiler $compiler,
+		protected Interfaces\Services\Router $router
 	) {
 		parent::__construct();
 	}
@@ -43,17 +46,13 @@ class Services extends Abstracts\Controller
 	public static function getServiceDefinitions(): array
 	{
 		return [
-			Assets::class   => ContainerBuilder::autowire()
-				->constructor(
-					asset_dir : ContainerBuilder::get( 'assets.dir' ),
-					app_dir   : ContainerBuilder::get( 'app.dir' ),
-                    app_url   : ContainerBuilder::get( 'app.url' )
-				),
-			Router::class   => ContainerBuilder::autowire(),
-			Compiler::class => ContainerBuilder::autowire()
-				->constructor(
-					dir : ContainerBuilder::get( 'app.dir' )
-				),
+			Service\Router::class               => ContainerBuilder::autowire(),
+			Service\Compiler::class             => ContainerBuilder::autowire(),
+			/**
+			 * Interfaces
+			 */
+			Interfaces\Services\Router::class   => ContainerBuilder::get( Service\Router::class ),
+			Interfaces\Services\Compiler::class => ContainerBuilder::get( Service\Compiler::class ),
 		];
 	}
 	/**
@@ -67,15 +66,8 @@ class Services extends Abstracts\Controller
 		add_filter( 'timber/twig', [ $this->compiler, 'loadFilters' ] );
 		add_filter( 'timber/locations', [ $this->compiler, 'templateLocations' ] );
 
-		$this->compiler->addFunction( 'has_action', 'has_action' );
-		$this->compiler->addFunction( 'do_action', 'do_action' );
-		$this->compiler->addFunction( 'apply_filters', 'apply_filters' );
-		$this->compiler->addFunction( 'get_terms', 'get_terms' );
-		$this->compiler->addFunction( 'get_posts', [ $this->compiler, 'getPosts' ] );
-		$this->compiler->addFunction(
-			'do_function',
-			[ $this->compiler, 'doFunction' ],
-			[ 'is_variadic' => true ]
-		);
+		add_action( 'wp', [ $this->router, 'loadRoute' ] );
+		add_action( 'admin_init', [ $this->router, 'loadRoute' ] );
+		add_action( 'login_init', [ $this->router, 'loadRoute' ] );
 	}
 }

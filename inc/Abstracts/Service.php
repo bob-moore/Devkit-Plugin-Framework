@@ -2,27 +2,29 @@
 /**
  * Service definition file
  *
- * Services provide functionality throughout the application
- *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author  Bob Moore <bob.moore@midwestfamilymadison.com>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
- * @link    https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link    https://github.com/MDMDevOps/mwf-cornerstone
  * @since   1.0.0
  */
 
-namespace DevKit\Plugin\Abstracts;
+namespace MWF\Plugin\Abstracts;
 
-use DevKit\Plugin\Interfaces;
+use MWF\Plugin\Interfaces;
+
+use DI\Attribute\Inject;
 
 /**
- * Abstract provider class
+ * Abstract Service class
  *
  * @subpackage Abstracts
  */
-abstract class Service extends Handler implements Interfaces\Service
+abstract class Service
+extends Loadable
+implements Interfaces\Service
 {
 	/**
 	 * Whether or not this class shouldn't be used
@@ -33,17 +35,16 @@ abstract class Service extends Handler implements Interfaces\Service
 	 *
 	 * @var boolean
 	 */
-	protected ?bool $enabled;
+	protected bool $enabled;
 	/**
 	 * Default constructor
 	 *
 	 * No parameters required. Will only continue the constructor path if class
 	 * is enabled.
 	 */
-	public function __construct()
+	public function __construct( bool $enabled = true )
 	{
-		parent::__construct();
-		if ( $this->setEnabled( true ) ) {
+		if ( $this->setEnabled( $enabled ) ) {
 			parent::__construct();
 		}
 	}
@@ -76,10 +77,11 @@ abstract class Service extends Handler implements Interfaces\Service
 	/**
 	 * Load actions and filters, and other setup requirements
 	 *
-	 * Only load if enabled.
+	 * Depends on not having previously performed the load action
 	 *
 	 * @return void
 	 */
+	#[Inject]
 	public function load(): void
 	{
 		if ( $this->isEnabled() ) {

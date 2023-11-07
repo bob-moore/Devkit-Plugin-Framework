@@ -1,5 +1,5 @@
 <?php
 
-namespace DevKit\Plugin\DL;
+namespace MWF\Plugin\DL;
 
 class Container {}

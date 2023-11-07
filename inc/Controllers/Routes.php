@@ -4,32 +4,34 @@
  *
  * PHP Version 8.0.28
  *
- * @package DevKit\Plugin
+ * @package MWF\Plugin
  * @author  Bob Moore <bob.moore@midwestfamilymadison.com>
  * @license GPL-2.0+ <http://www.gnu.org/licenses/gpl-2.0.txt>
- * @link    https://github.com/bob-moore/Devkit-Plugin-Framework
+ * @link    https://github.com/MDMDevOps/mwf-cornerstone
  * @since   1.0.0
  */
 
-namespace DevKit\Plugin\Controllers;
+namespace MWF\Plugin\Controllers;
 
-use DevKit\Plugin\Abstracts,
-	DevKit\Plugin\Interfaces;
+use MWF\Plugin\DI\ContainerBuilder,
+	MWF\Plugin\Abstracts,
+	MWF\Plugin\Interfaces,
+	MWF\Plugin\Routes as Route;
 
 /**
  * Control functions related to routing
  *
  * @subpackage Controllers
  */
-class Routes 
+class Routes
 extends Abstracts\Controller
 {
 	/**
 	 * Construct new instance of the controller
 	 *
-	 * @param Interfaces\Handlers\Routes $route_handler : Instance of Services Router.
+	 * @param Interfaces\Services\Router $router : Instance of Services Router.
 	 */
-	public function __construct( protected Interfaces\Handlers\Routes $route_handler )
+	public function __construct( protected Interfaces\Services\Router $router )
 	{
 		parent::__construct();
 	}
@@ -41,24 +43,24 @@ extends Abstracts\Controller
 	public static function getServiceDefinitions(): array
 	{
 		return [
-			// Frontend::class   => ContainerBuilder::autowire(),
-			// Admin::class      => ContainerBuilder::autowire(),
-			// Login::class      => ContainerBuilder::autowire(),
-			// Single::class     => ContainerBuilder::autowire(),
-			// Frontpage::class  => ContainerBuilder::autowire(),
-			// Archive::class    => ContainerBuilder::autowire(),
-			// Blog::class       => ContainerBuilder::autowire(),
-			// Search::class     => ContainerBuilder::autowire(),
-			// Error404::class   => ContainerBuilder::autowire(),
-			// 'route.frontend'  => ContainerBuilder::get( Frontend::class ),
-			// 'route.admin'     => ContainerBuilder::get( Admin::class ),
-			// 'route.login'     => ContainerBuilder::get( Login::class ),
-			// 'route.single'    => ContainerBuilder::get( Single::class ),
-			// 'route.frontpage' => ContainerBuilder::get( Frontpage::class ),
-			// 'route.archive'   => ContainerBuilder::get( Archive::class ),
-			// 'route.blog'      => ContainerBuilder::get( Blog::class ),
-			// 'route.search'    => ContainerBuilder::get( Search::class ),
-			// 'route.404'       => ContainerBuilder::get( Error404::class ),
+			Route\Frontend::class  => ContainerBuilder::autowire(),
+			Route\Admin::class     => ContainerBuilder::autowire(),
+			Route\Login::class     => ContainerBuilder::autowire(),
+			Route\Single::class    => ContainerBuilder::autowire(),
+			Route\Frontpage::class => ContainerBuilder::autowire(),
+			Route\Archive::class   => ContainerBuilder::autowire(),
+			Route\Blog::class      => ContainerBuilder::autowire(),
+			Route\Search::class    => ContainerBuilder::autowire(),
+			Route\Error404::class  => ContainerBuilder::autowire(),
+			'route.frontend'       => ContainerBuilder::get( Route\Frontend::class ),
+			'route.admin'          => ContainerBuilder::get( Route\Admin::class ),
+			'route.login'          => ContainerBuilder::get( Route\Login::class ),
+			'route.single'         => ContainerBuilder::get( Route\Single::class ),
+			'route.frontpage'      => ContainerBuilder::get( Route\Frontpage::class ),
+			'route.archive'        => ContainerBuilder::get( Route\Archive::class ),
+			'route.blog'           => ContainerBuilder::get( Route\Blog::class ),
+			'route.search'         => ContainerBuilder::get( Route\Search::class ),
+			'route.404'            => ContainerBuilder::get( Route\Error404::class ),
 		];
 	}
 	/**
@@ -73,13 +75,13 @@ extends Abstracts\Controller
 		add_action( 'login_init', [ $this, 'loadRoute' ] );
 	}
 	/**
-	 * Setter for $route
+	 * Load route specific classes
 	 *
 	 * @return void
 	 */
 	public function loadRoute(): void
 	{
-		foreach ( $this->route_handler->getRoutes() as $route ) {
+		foreach ( $this->router->getRoutes() as $route ) {
 			$alias = 'route.' . strtolower( $route );
 
 			$has_route = apply_filters( "{$this->package}_has_route", false, $alias );
